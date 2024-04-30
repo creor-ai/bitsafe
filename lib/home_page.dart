@@ -1,3 +1,4 @@
+import 'package:bitsafe/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import '../models/address_details.dart';
 import '../services/blockchain_service.dart';
@@ -108,10 +109,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('BitSafe: Bitcoin Address Checker'),
-        backgroundColor: Colors.orangeAccent[700],
-      ),
+      appBar: CustomAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
