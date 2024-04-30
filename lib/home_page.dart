@@ -1,3 +1,4 @@
+import 'package:bitsafe/adview.dart';
 import 'package:bitsafe/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import '../models/address_details.dart';
@@ -161,7 +162,8 @@ class _HomePageState extends State<HomePage> {
               _buildCheckResultTile('Nonce Reuse', _addressDetails!.isNonceReuseChecked, _addressDetails!.isNonceReuseVulnerable),
               _buildCheckResultTile('Unusual Patterns', _addressDetails!.isUnusualPatternsChecked, _addressDetails!.isUnusualPatternsVulnerable),
               _buildCheckResultTile('Dust Transactions', _addressDetails!.isDustTransactionsChecked, _addressDetails!.isDustTransactionsVulnerable),
-            ]
+            ],
+            adsenseAdsView(),
           ],
         ),
       ),

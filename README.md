@@ -10,6 +10,12 @@ This project is a great starting point for anyone interested in developing appli
 
 Ensure you have Flutter installed on your development machine. For installation guidance, refer to the [Flutter installation guide](https://docs.flutter.dev/get-started/install).
 
+### Build the Application
+
+```bash
+flutter build web
+```
+
 ### Running the Application
 
 To run BitSafe in a development environment, especially if you are targeting web platforms, use the following command:
