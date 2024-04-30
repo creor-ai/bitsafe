@@ -1,15 +1,15 @@
 class AddressDetails {
   final String address;
-  bool isNonceReuseChecked;
-  bool isNonceReuseVulnerable;
-  bool isAddressReuseChecked;
-  bool isAddressReuseVulnerable;
-  bool isCompromisedLinkChecked;
-  bool isCompromisedLinkVulnerable;
-  bool isUnusualPatternsChecked;
-  bool isUnusualPatternsVulnerable;
-  bool isDustTransactionsChecked;
-  bool isDustTransactionsVulnerable;
+  bool isNonceReuseChecked = false;
+  bool isNonceReuseVulnerable = false;
+  bool isAddressReuseChecked = false;
+  bool isAddressReuseVulnerable = false;
+  bool isCompromisedLinkChecked = false;
+  bool isCompromisedLinkVulnerable = false;
+  bool isUnusualPatternsChecked = false;
+  bool isUnusualPatternsVulnerable = false;
+  bool isDustTransactionsChecked = false;
+  bool isDustTransactionsVulnerable = false;
 
   AddressDetails({
     required this.address,

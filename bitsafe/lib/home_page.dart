@@ -13,33 +13,86 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = false;
   AddressDetails? _addressDetails;
 
-  void _checkAddress() async {
-    setState(() {
-      _isLoading = true;
-      _addressDetails = null; // Reset previous results
-    });
+  void initState() {
+    super.initState();
+    // Initialize with all checks as not attempted
+    _addressDetails = AddressDetails(address: '');
+  }
 
-    String address = _controller.text;
-    if (address.isEmpty) {
-      setState(() {
-        _isLoading = false;
-        _addressDetails = null;
-      });
+  void _checkAddress() async {
+    if (_controller.text.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("Please enter a Bitcoin address to check."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
       return;
     }
 
-    try {
-      var transactions = await BlockchainService().fetchTransactions(address);
-      var details = AddressDetails(address: address);
-      VulnerabilityChecks.runAllChecks(transactions, details);
+    setState(() {
+      _isLoading = true;
+      // Initialize checks as pending with initial false status
+      _addressDetails = AddressDetails(address: _controller.text);
+    });
 
+    try {
+      var transactions = await BlockchainService().fetchTransactions(_controller.text);
+      var details = AddressDetails(address: _controller.text);
+
+      // Address Reuse Check
+      VulnerabilityChecks.checkAddressReuse(transactions, details);
+      setState(() {
+        _addressDetails!.isAddressReuseChecked = true;
+        _addressDetails!.isAddressReuseVulnerable = details.isAddressReuseVulnerable;
+      });
+
+      // // Nonce Reuse Check
+      // VulnerabilityChecks.checkNonceReuse(transactions, details);
+      // setState(() {
+      //   _addressDetails!.isNonceReuseChecked = true;
+      //   _addressDetails!.isNonceReuseVulnerable = details.isNonceReuseVulnerable;
+      // });
+
+      // Unusual Patterns Check
+      VulnerabilityChecks.checkUnusualPatterns(transactions, details);
+      setState(() {
+        _addressDetails!.isUnusualPatternsChecked = true;
+        _addressDetails!.isUnusualPatternsVulnerable = details.isUnusualPatternsVulnerable;
+      });
+
+      // Dust Transactions Check
+      VulnerabilityChecks.checkDustTransactions(transactions, details);
+      setState(() {
+        _addressDetails!.isDustTransactionsChecked = true;
+        _addressDetails!.isDustTransactionsVulnerable = details.isDustTransactionsVulnerable;
+      });
+
+      // Optionally update the UI after all checks are completed
       setState(() {
         _addressDetails = details;
       });
     } catch (e) {
-      setState(() {
-        _addressDetails = AddressDetails(address: address); // No results found, possibly with error message
-      });
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("Failed to fetch data: $e"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -52,7 +105,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('BitSafe Bitcoin Checker'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.orangeAccent[700],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -76,18 +129,35 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isLoading ? null : _checkAddress,
-              child: _isLoading ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)) : Text('Check Address'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+              child: _isLoading
+                  ? SizedBox(
+                      height: 20, // Smaller height
+                      width: 20, // Smaller width to maintain the circular shape
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, // Thinner stroke
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                    )
+                  : Text('Check Address', style: TextStyle(color: Colors.black)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orangeAccent[700], // Background color of the button
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5), // Set your custom border radius here
+                ), // Highly rounded edges, pill shape
+                padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0), // Horizontal padding for wider button appearance
+                fixedSize: Size.fromHeight(40), // Set the height of the button
+                textStyle: TextStyle(
+                  fontSize: 16, // Font size
+                ),
+              ),
             ),
             SizedBox(height: 20),
             if (_addressDetails != null) ...[
               Text('Results for: ${_addressDetails!.address}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              _buildCheckResultTile('Address Reuse', _addressDetails!.isAddressReuseVulnerable),
-              _buildCheckResultTile('Nonce Reuse', _addressDetails!.isNonceReuseVulnerable),
-              _buildCheckResultTile('Compromised Link', _addressDetails!.isCompromisedLinkVulnerable),
-              _buildCheckResultTile('Unusual Patterns', _addressDetails!.isUnusualPatternsVulnerable),
-              _buildCheckResultTile('Dust Transactions', _addressDetails!.isDustTransactionsVulnerable),
+              _buildCheckResultTile('Address Reuse', _addressDetails!.isAddressReuseChecked, _addressDetails!.isAddressReuseVulnerable),
+              _buildCheckResultTile('Nonce Reuse', _addressDetails!.isNonceReuseChecked, _addressDetails!.isNonceReuseVulnerable),
+              _buildCheckResultTile('Unusual Patterns', _addressDetails!.isUnusualPatternsChecked, _addressDetails!.isUnusualPatternsVulnerable),
+              _buildCheckResultTile('Dust Transactions', _addressDetails!.isDustTransactionsChecked, _addressDetails!.isDustTransactionsVulnerable),
             ]
           ],
         ),
@@ -95,7 +165,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCheckResultTile(String checkName, bool isVulnerable) {
+  Widget _buildCheckResultTile(String checkName, bool isChecked, bool isVulnerable) {
+    Color iconColor = isChecked ? (isVulnerable ? Colors.red : Colors.green) : Colors.grey;
+    IconData icon = isChecked ? (isVulnerable ? Icons.close : Icons.check) : Icons.hourglass_empty;
+
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       leading: AnimatedContainer(
@@ -103,23 +176,17 @@ class _HomePageState extends State<HomePage> {
         width: 24,
         height: 24,
         decoration: BoxDecoration(
-          color: isVulnerable ? Colors.red : Colors.green,
+          color: iconColor,
           shape: BoxShape.circle,
         ),
         child: Icon(
-          isVulnerable ? Icons.close : Icons.check,
+          icon,
           color: Colors.white,
           size: 16,
         ),
       ),
       title: Text(checkName),
-      trailing: Switch(
-        value: !isVulnerable,
-        onChanged: (value) {},
-        activeColor: Colors.green,
-        inactiveThumbColor: Colors.red,
-        inactiveTrackColor: Colors.red[200],
-      ),
+      subtitle: Text(isChecked ? (isVulnerable ? 'Vulnerable' : 'Safe') : 'Pending'),
     );
   }
 }
