@@ -54,12 +54,12 @@ class _HomePageState extends State<HomePage> {
         _addressDetails!.isAddressReuseVulnerable = details.isAddressReuseVulnerable;
       });
 
-      // // Nonce Reuse Check
-      // VulnerabilityChecks.checkNonceReuse(transactions, details);
-      // setState(() {
-      //   _addressDetails!.isNonceReuseChecked = true;
-      //   _addressDetails!.isNonceReuseVulnerable = details.isNonceReuseVulnerable;
-      // });
+      // Nonce Reuse Check
+      VulnerabilityChecks.checkNonceReuse(transactions, details);
+      setState(() {
+        _addressDetails!.isNonceReuseChecked = true;
+        _addressDetails!.isNonceReuseVulnerable = details.isNonceReuseVulnerable;
+      });
 
       // Unusual Patterns Check
       VulnerabilityChecks.checkUnusualPatterns(transactions, details);
@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('BitSafe Bitcoin Checker'),
+        title: Text('BitSafe: Bitcoin Address Checker'),
         backgroundColor: Colors.orangeAccent[700],
       ),
       body: SingleChildScrollView(
