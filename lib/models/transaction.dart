@@ -11,32 +11,39 @@ class Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
-      txid: json['txid'],
-      inputs: List<TransactionInput>.from(json['vin'].map((input) => TransactionInput.fromJson(input))),
-      outputs: List<TransactionOutput>.from(json['vout'].map((output) => TransactionOutput.fromJson(output))),
+      txid: json['txid'] as String,
+      inputs: (json['vin'] as List).map((i) => TransactionInput.fromJson(i as Map<String, dynamic>)).toList(),
+      outputs: (json['vout'] as List).map((o) => TransactionOutput.fromJson(o as Map<String, dynamic>)).toList(),
     );
   }
 }
 
 class TransactionInput {
+  final String txid;
+  final int vout;
+  final String sigScript;
+  final String prevoutScript;
   final String address;
   final double amount;
-  final String sigScript; // Assuming this is necessary for nonce reuse checks
-  final String prevoutScript;
 
   TransactionInput({
-    required this.address,
-    required this.amount,
+    required this.txid,
+    required this.vout,
     required this.sigScript,
     required this.prevoutScript,
+    required this.address,
+    required this.amount,
   });
 
   factory TransactionInput.fromJson(Map<String, dynamic> json) {
+    var prevout = json['prevout'] as Map<String, dynamic>?;
     return TransactionInput(
-      address: json['address'] ?? 'Unknown Address', // Default value if not present
-      amount: json['value'] != null ? double.parse(json['value'].toString()) : 0.0, // Default to 0 if not present
-      sigScript: json['sigScript'] ?? '', // Default to empty string if not present
-      prevoutScript: json['prevout'] != null ? json['prevout']['script'] : '', // Default to empty if not present
+      txid: json['txid'] as String? ?? 'Unknown TxID',
+      vout: json['vout'] as int? ?? 0,
+      sigScript: json['scriptsig'] as String? ?? '',
+      prevoutScript: prevout != null ? (prevout['scriptpubkey'] as String? ?? '') : '',
+      address: prevout != null ? (prevout['scriptpubkey_address'] as String? ?? 'Unknown Address') : 'Unknown Address',
+      amount: prevout != null ? (prevout['value'] as num?)?.toDouble() ?? 0.0 : 0.0,
     );
   }
 }
@@ -52,8 +59,8 @@ class TransactionOutput {
 
   factory TransactionOutput.fromJson(Map<String, dynamic> json) {
     return TransactionOutput(
-      address: json['address'] ?? 'Unknown Address', // Provide a default value if the address is missing
-      amount: json['value'] != null ? double.parse(json['value'].toString()) : 0.0, // Default to 0 if value is missing
+      address: json['scriptpubkey_address'] as String? ?? 'Unknown Address',
+      amount: (json['value'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

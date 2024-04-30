@@ -79,16 +79,21 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _addressDetails = details;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Catch the exception and stack trace for more detailed debugging
+      // Log the error and stack trace to the console for debugging
+      print('Failed to fetch data: $e');
+      print('Stack Trace: $stackTrace');
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Error"),
-          content: Text("Failed to fetch data: $e"),
+          title: const Text("Error"),
+          content: const Text("We encountered an issue while processing your request. Please try again later."),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
