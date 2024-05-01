@@ -1,4 +1,4 @@
-import 'package:bitsafe/adview.dart';
+// import 'package:bitsafe/adview.dart';
 import 'package:bitsafe/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import '../models/address_details.dart';
@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> {
             TextField(
               controller: _controller,
               decoration: InputDecoration(
-                hintText: 'Enter Bitcoin Address',
+                hintText: 'Enter Bitcoin Address (e.g. 1A8TY7dxURcsRtPBs7fP6bDVzAgpgP4962)',
                 suffixIcon: IconButton(
                   icon: Icon(Icons.clear),
                   onPressed: () => _controller.clear(),
@@ -156,14 +156,16 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(height: 20),
             if (_addressDetails != null) ...[
-              Text('Results for: ${_addressDetails!.address}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              _buildCheckResultTile('Address Reuse', _addressDetails!.isAddressReuseChecked, _addressDetails!.isAddressReuseVulnerable),
-              _buildCheckResultTile('Nonce Reuse', _addressDetails!.isNonceReuseChecked, _addressDetails!.isNonceReuseVulnerable),
-              _buildCheckResultTile('Unusual Patterns', _addressDetails!.isUnusualPatternsChecked, _addressDetails!.isUnusualPatternsVulnerable),
-              _buildCheckResultTile('Dust Transactions', _addressDetails!.isDustTransactionsChecked, _addressDetails!.isDustTransactionsVulnerable),
+              Column(children: [
+                Text('Vulnerability Checks for ${_addressDetails!.address}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                SizedBox(height: 10),
+                _buildCheckResultTile('Address Reuse', _addressDetails!.isAddressReuseChecked, _addressDetails!.isAddressReuseVulnerable),
+                _buildCheckResultTile('Nonce Reuse', _addressDetails!.isNonceReuseChecked, _addressDetails!.isNonceReuseVulnerable),
+                _buildCheckResultTile('Unusual Patterns', _addressDetails!.isUnusualPatternsChecked, _addressDetails!.isUnusualPatternsVulnerable),
+                _buildCheckResultTile('Dust Transactions', _addressDetails!.isDustTransactionsChecked, _addressDetails!.isDustTransactionsVulnerable),
+              ])
             ],
-            adsenseAdsView(),
+            // adsenseAdsView(),
           ],
         ),
       ),
